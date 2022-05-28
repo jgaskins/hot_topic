@@ -7,7 +7,7 @@ require "json"
 describe HotTopic do
   it "calls the HTTP::Handler" do
     client = HotTopic.new(EchoApp.new)
-    response = client.get("/foo", headers: HTTP::Headers { "accept" => "application/json" })
+    response = client.get("/foo", headers: HTTP::Headers{"accept" => "application/json"})
     echo_response = EchoApp::JSONResponse.from_json(response.body)
 
     response.should be_a HTTP::Client::Response
@@ -52,10 +52,10 @@ class EchoApp
     body = body.gets_to_end if body.is_a? IO
 
     {
-      method: request.method,
-      path: request.path,
+      method:  request.method,
+      path:    request.path,
       headers: request.headers.to_h,
-      body: body,
+      body:    body,
     }.to_json context.response
   end
 
@@ -81,7 +81,7 @@ class WebSocketEchoApp
 
       accept_code = Base64.strict_encode(OpenSSL::SHA1.hash("#{key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11"))
 
-      response.status = HTTP::Status::SWITCHING_PROTOCOLS 
+      response.status = HTTP::Status::SWITCHING_PROTOCOLS
       response.headers["Upgrade"] = "websocket"
       response.headers["Connection"] = "Upgrade"
       response.headers["Sec-Websocket-Accept"] = accept_code
