@@ -31,7 +31,7 @@ module HotTopic
       HTTP::Client::Response.from_io(buffer.rewind)
     end
 
-    def exec_internal(request : HTTP::Request)
+    def exec_internal(request : HTTP::Request, & : HTTP::Client::Response -> T) : T forall T
       buffer = IO::Memory.new
       response = HTTP::Server::Response.new(buffer)
       context = HTTP::Server::Context.new(request, response)
@@ -39,7 +39,17 @@ module HotTopic
       @app.call(context)
       response.close
 
-      yield HTTP::Client::Response.from_io(buffer.rewind)
+      if r = HTTP::Client::Response.from_io(buffer.rewind) { |response| yield response }
+        r
+      else
+        yield HTTP::Client::Response.new(
+          status: response.status,
+          status_message: response.status_message,
+          headers: response.headers,
+          version: response.version,
+          body_io: response.output.as(HTTP::Server::Response::Output).@io,
+        )
+      end
     end
   end
 end
