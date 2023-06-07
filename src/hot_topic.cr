@@ -30,5 +30,16 @@ module HotTopic
 
       HTTP::Client::Response.from_io(buffer.rewind)
     end
+
+    def exec_internal(request : HTTP::Request)
+      buffer = IO::Memory.new
+      response = HTTP::Server::Response.new(buffer)
+      context = HTTP::Server::Context.new(request, response)
+
+      @app.call(context)
+      response.close
+
+      yield HTTP::Client::Response.from_io(buffer.rewind)
+    end
   end
 end
