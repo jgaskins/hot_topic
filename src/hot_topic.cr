@@ -1,4 +1,5 @@
-require "http"
+require "http/client"
+require "log"
 
 module HotTopic
   VERSION = "0.1.0"
@@ -12,12 +13,25 @@ module HotTopic
   end
 
   class Client(T) < HTTP::Client
+    getter app : T
+    getter app_name : String
+    @log : ::Log
+
     # These ivars are required by HTTP::Client but we don't need them so we set
     # them to whatever.
     @host = ""
     @port = -1
 
-    def initialize(@app : T)
+    def initialize(@app, @app_name = app.class.name, *, @log = ::Log.for(HotTopic))
+    end
+
+    protected def around_exec(request, &)
+      @log.debug &.emit "request",
+        app: app_name,
+        method: request.method,
+        resource: request.resource
+
+      yield
     end
 
     def exec_internal(request : HTTP::Request) : HTTP::Client::Response
