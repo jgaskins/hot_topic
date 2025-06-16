@@ -34,7 +34,7 @@ module HotTopic
       yield
     end
 
-    def exec_internal(request : HTTP::Request) : HTTP::Client::Response
+    private def exec_internal(request : HTTP::Request) : HTTP::Client::Response
       buffer = IO::Memory.new
       response = HTTP::Server::Response.new(buffer)
       context = HTTP::Server::Context.new(request, response)
@@ -45,7 +45,7 @@ module HotTopic
       HTTP::Client::Response.from_io(buffer.rewind)
     end
 
-    def exec_internal(request : HTTP::Request, & : HTTP::Client::Response -> T) : T forall T
+    private def exec_internal(request : HTTP::Request, & : HTTP::Client::Response -> T) : T forall T
       buffer = IO::Memory.new
       response = HTTP::Server::Response.new(buffer)
       context = HTTP::Server::Context.new(request, response)
